@@ -1,7 +1,15 @@
 pipeline {
     agent any  // Runs on any available agent
-     tools {
-        maven 'maven_3.9.9'  // Use the Maven version configured in Jenkins
+    //  tools {
+    //     maven 'maven_3.9.9'  // Use the Maven version configured in Jenkins
+    // }
+    environment {
+        // NEXUS_URL = 'http://54.167.172.185:8081'  // Replace with your Nexus URL
+        // NEXUS_REPO = 'maven-releases'            // Replace with your Nexus Repository name
+        // NEXUS_CREDENTIALS_ID = 'nexus' // Jenkins credentials ID for Nexus
+        // ARTIFACT_NAME = 'javaApp.jar'            // Name of the artifact
+        MAVEN_HOME = tool 'maven_3.9.9'  // Replace with the name of your Maven installation in Jenkins
+        PATH = "${MAVEN_HOME}/bin:${PATH}"
     }
 
 
