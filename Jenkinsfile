@@ -23,7 +23,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Building the application..."
-                sh 'mvn deploy'  // Example: Maven build command
+                sh 'mvn deploy -X'  // Example: Maven build command
             }
         }
 
