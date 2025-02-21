@@ -27,7 +27,7 @@ pipeline {
                         mvn sonar:sonar \
                             -Dsonar.projectKey=Demo \
                             -Dsonar.host.url=http://18.116.61.229:9000 \
-                            -Dsonar.login=credentials('Sonar')
+                            -Dsonar.login=sqa_77f3a765e24b300217f0daf54642ba72e305c39e
                     '''
                 }
             }
