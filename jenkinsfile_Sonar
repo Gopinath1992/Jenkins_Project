@@ -2,28 +2,31 @@ pipeline {
     agent any
 
     environment {
-        SONAR_HOST_URL = 'http://18.116.61.229:9000/
-        SONAR_PROJECT_KEY = 'Demo'
-        SONAR_TOKEN = credentials('Sonar')  // Fetch from Jenkins credentials
+        SONARQUBE_SERVER = "Sonar"  // Name configured in Jenkins
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                git credentialsId: 'GitHub', url: 'https://github.com/Gopinath1992/Jenkins_Project.git'
+                 git credentialsId: 'GitHub', url: 'https://github.com/Gopinath1992/Jenkins_Project.git'
             }
         }
 
-        stage('Build & Test') {
+        stage('Build') {
             steps {
-                sh 'mvn clean verify'
+                sh 'mvn clean package'  // Modify for your project type
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {  // Use the configured SonarQube instance
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
+                withSonarQubeEnv(SONARQUBE_SERVER) {
+                    sh '''
+                        mvn sonar:sonar \
+                            -Dsonar.projectKey=Demo \
+                            -Dsonar.host.url=http://18.116.61.229:9000 \
+                            -Dsonar.login=credentials('Sonar')
+                    '''
                 }
             }
         }
@@ -31,8 +34,11 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 script {
-                    timeout(time: 1, unit: 'MINUTES') {
-                        waitForQualityGate abortPipeline: true
+                    timeout(time: 5, unit: 'MINUTES') {
+                        def qualityGate = waitForQualityGate()
+                        if (qualityGate.status != 'OK') {
+                            error "Quality Gate failed: ${qualityGate.status}"
+                        }
                     }
                 }
             }
