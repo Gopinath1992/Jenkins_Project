@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    environment {
+        SONAR_HOST_URL = 'http://18.116.61.229:9000/
+        SONAR_PROJECT_KEY = 'Demo'
+        SONAR_TOKEN = credentials('Sonar')  // Fetch from Jenkins credentials
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git credentialsId: 'GitHub', url: 'https://github.com/Gopinath1992/Jenkins_Project.git'
+            }
+        }
+
+        stage('Build & Test') {
+            steps {
+                sh 'mvn clean verify'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {  // Use the configured SonarQube instance
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                script {
+                    timeout(time: 1, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
+            }
+        }
+    }
+}
